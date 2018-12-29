@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Shadow nRepl" type="ClojureREPL" factoryName="Remote" activateToolWindowBeforeRun="false">
+    <module name="crinkle" />
+    <setting name="host" value="localhost" />
+    <setting name="port" value="43083" />
+    <setting name="replType" value="0" />
+    <method v="2" />
+  </configuration>
+</component>

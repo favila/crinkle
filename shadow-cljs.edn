@@ -1,0 +1,9 @@
+;; shadow-cljs configuration
+{:deps   {:aliases [:test]}
+ :nrepl  {:port 43083}
+ :builds {:test {:target           :browser-test
+                 :test-dir         "target/public/js/test"
+                 :output-to        "target/public/js/test"
+                 :compiler-options {:infer-externs :auto}
+                 :devtools         {:http-port 8021
+                                    :http-root "target/public/js/test"}}}}
