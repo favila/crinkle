@@ -3,14 +3,13 @@ Crinkle
 
 Crinkle is a CLJS wrapper for modern (v16+) React. Its goals:
 
-* Emit ReactElements (instead of createElement calls) at compile time.
-* Keep key and ref separate (instead of mixed with props).
 * Keep props object opaque (instead of plain JS objects wth reserved "key",
   "ref", and "children" properties) as much as possible. This is to allow using
   immutable data structures directly as props.
 * Allow using normal CLJS functions as render functions (instead of requiring
   property access on its props arguments or wrapping in a function or
   React.Component).
+* Keep key and ref separate (instead of mixed with props).
 * Provide a Hooks-like interface that compares changes by CLJS `=` (instead of
   React's `Object.equal()`). (EXPERIMENTAL)
 * Provide some macros for easier construction of class-based Components
@@ -152,8 +151,8 @@ shadow-cljs watch test
 
 Then the following will be available:
 
-* [Shadow build dashboard on port 9630][http://localhost:9630/dashboard]
-* [Test output on port 8201][http://localhost:8021/]
+* [Shadow build dashboard on port 9630](http://localhost:9630/dashboard)
+* [Test output on port 8201](http://localhost:8021/)
 * nREPL server on port 43083. (In IntelliJ IDEA with Cursive, use the included
   *Shadow nRepl* run configuration to connect to this port.)
 
