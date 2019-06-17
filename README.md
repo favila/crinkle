@@ -126,10 +126,6 @@ elements in this array is not customizeable like `React.memo()` so there is no
 way to benefit from using CLJS immutable data structures. Working around this
 problem is a TODO, and may be impossible without patching react.
 
-Some experiments reimplementing hooks in a CLJS-friendly way using normal
-React components are in `crinkle.hook`, but right now this experiment suffers
-from not being able to access the same effect scheduling that Hooks can.
-
 Development
 -----------
 
