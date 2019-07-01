@@ -5,7 +5,7 @@ Crinkle is a CLJS wrapper for modern (v16+) React. Its goals:
 
 * Keep props object opaque (instead of plain JS objects wth reserved "key",
   "ref", and "children" properties) as much as possible. This is to allow using
-  immutable data structures directly as props.
+  immutable data structures directly as props without wrappers.
 * Allow using normal CLJS functions as render functions (instead of requiring
   property access on its props arguments or wrapping in a function or
   React.Component).
@@ -15,6 +15,58 @@ Crinkle is a CLJS wrapper for modern (v16+) React. Its goals:
 * Provide some macros for easier construction of class-based Components
   (instead of using `React.createClass()`). (TODO; this might be better as a
   separate project providing macro sugar to JS `class` syntax.)
+
+Elevator Pitch
+--------------
+
+Why should you use Crinkle instead of any of the other CLJS react wrappers?
+Because with Crinkle you can use *any* one-argument CLJS function as a render
+function:
+
+```clojure
+;; Define a component
+(defn my-function-component [{:keys [foo-text] :as props}]
+  ;; Return React Elements using any library (or not) you want.
+  ;; Here's one way using Crinkle:
+  (RE :p foo-text))
+  
+;; Note: no wrappers or component factories! 
+(react/render
+  (CE my-function-component {:foo-text "Hello World!"})
+  (js/document.body))
+```
+
+Even if you are using class components, you don't need any prop wrapping
+or component factories.
+
+```clojure
+;; Class components are fine too
+(def MyClassComponent
+  (create-react-class/createReactClass
+     #js{:render (fn [{:keys foo-text}] (RE :p foo-text))}))
+
+(react/render
+  (CE MyClassComponent {:foo-text "Hello World!"})
+  (js/document.body))
+```
+
+React's `createElement` function requires a JS object for props because it
+inspects it for special fields `key`, `ref`, and `children`. This means if you
+want to use CLJS values for props you need to wrap your props (e.g.
+`#js{:value my-cljs-props}`); if you want to `shouldComponentUpdate` or
+`React.memo` you need to account for this wrapping; you may also want a special
+`defcomponent` macro to unwrap the props for you and create a corresponding
+generated create-element factory to wrap the props. You may have to create an
+entire tower of protocols (for the lifecycle methods), factories, and macros
+simply to account for this extra level of prop wrapping.
+
+Crinkle's approach is different: it doesn't use `createElement` and thus doesn't
+need wrapper values around your real CLJS props. Instead, props are completely
+opaque; `:key` and `:ref` are optional and must be provided separately from
+props. This sorcery is provided by the function
+`crinkle.component/create-element-raw-props`, but most of the time you will use
+the `CE` macro. Read [Crinkle Elements](#crinkle-elements) for full
+documentation.
 
 Installation
 ------------
