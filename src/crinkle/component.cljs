@@ -1,6 +1,6 @@
 (ns crinkle.component
   (:require-macros crinkle.component)
-  (:require [react]
+  (:require [react :as react]
             [goog.object :as gobj]))
 
 ;; INTERNAL USE ONLY! These are aliases for macroexpansion to target
@@ -124,3 +124,80 @@
        (create-element-raw-props mr props nil nil))
       ([props {:keys [key ref]}]
         (create-element-raw-props mr props key ref)))))
+
+(defn useEquiv
+  "Takes a value and a comparison function. Returns an equivalent (but not
+  necessarily identical) value. The comparison function must be hook-static.
+  The comparison function must take an old and new object and return true if
+  they are equal and false if they are not.
+
+  The identity of the returned object will only change on subsequent renders
+  if the comparison function returns false; otherwise it will return the
+  equivalent object from a previous render so that hooks that look for
+  deps array changes will not detect a change.
+
+  This function exists because useMemo, useEffect & company do not accept a
+  custom comparator, so immutable equal-but-not-identical values retrigger
+  these hooks unnecessarily. Use this hook on values you intend to include
+  in a deps array.
+
+  Example use:
+
+     (let [v (useEquiv v =)
+           m (react/useMemo #(some-expensive-fn v) #js[v])]
+       ,,,)
+
+  Note the comparison function runs during the render phase, so keep it fast.
+
+  See also `useEquivDeps`, `use=`, `use=deps`."
+  [value equal?]
+  (let [vref (react/useRef value)
+        oldv (.-current vref)]
+    (if ^boolean (equal? value oldv)
+      ;; unsure if better to have an always-setting fn and include value in the
+      ;; deps; or to do this.
+      (do (react/useEffect goog/nullFunction) oldv)
+      (do (react/useEffect #(do (set! (.-current vref) value)
+                                (crinkle.component/js-undefined)))
+          value))))
+
+(defn use=
+  "Like `useEquiv`, but with a hardcoded cljs = comparison function"
+  [value]
+  (let [vref (react/useRef value)]
+    (if (= value (.-current vref))
+      (do (react/useEffect goog/nullFunction) (.-current vref))
+      (do (react/useEffect #(do (set! (.-current vref) value)
+                                (crinkle.component/js-undefined)))
+          value))))
+
+;; Two ways we could improve these:
+;; 1. With a macro to rewrite calls inline (avoid array looping during render)
+;; 2. With a single effect function to update all refs
+;; Doing both at once is hard/impossible; unsure which is better perf.
+(defn useEquivDeps
+  "Accept a deps array and mutate and return it with the result of running
+  each value through useEquiv.
+
+  See also `use=deps`
+
+  This is a more efficient and convenient version of:
+
+      (into-array (map #(useEquiv % comparisonfn) #js[dep1, dep2])"
+  [^array deps equal?]
+  (loop [i (dec (alength deps))]
+    (if (>= i 0)
+      (do
+        (aset deps i (useEquiv (aget deps i) equal?))
+        (recur (dec i)))
+      deps)))
+
+(defn use=deps
+  "Like `useEquivDeps`, but with a hardcoded cljs = comparison function"
+  [^array deps]
+  (loop [i (dec (alength deps))]
+    (if (>= i 0)
+      (do
+        (aset deps i (use= (aget deps i)))
+        (recur (dec i)))
+      deps)))

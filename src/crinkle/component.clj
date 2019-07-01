@@ -90,3 +90,10 @@
     `(~'js/crinkle.component.react-createElement*
        crinkle.component/react-Fragment* nil ~@children)
     (meta &form)))
+
+(defmacro js-undefined
+  "Expand to the special js undefined value. Useful for useEffect, which needs
+  not to return (i.e. return undefined) when no cleanup function is desired.
+  Returning nil/null or anything else isn't acceptable to React"
+  []
+  (with-meta (list 'js* "(void 0)") (meta &form)))
