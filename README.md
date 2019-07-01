@@ -19,10 +19,20 @@ Crinkle is a CLJS wrapper for modern (v16+) React. Its goals:
 Installation
 ------------
 
-Packaging and distribution is not figured out yet.
+React 16.8 or later is required, but not declared as a cljs-discoverable
+dependency so you will have to provide it yourself. This project provides it
+via npm using shadow-cljs; you can also use [cljsjs/react](https://github.com/cljsjs/packages/tree/master/react)
+or any cljs packaging of react which uses `:global-exports` to expose the
+name `react`.
 
-A `deps.edn` file is included, so using this as a git dependency via deps.edn is
-possible.
+You can consume this as a maven artifact from clojars:
+
+[![Clojars Project](https://img.shields.io/clojars/v/crinkle.svg)](https://clojars.org/crinkle)
+
+Or a `deps.edn`-based git dependency.
+
+I tag `vMAJOR.MINOR` commits; revision numbers are incremented automatically and
+may or may not be tagged. (Like Clojurescript version numbers.)
 
 Usage
 -----
