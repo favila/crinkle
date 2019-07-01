@@ -37,7 +37,6 @@ may or may not be tagged. (Like Clojurescript version numbers.)
 Usage
 -----
 
-
 ### React Elements
 
 `crinkle.component/RE` creates a React Element using React's normal key, props,
@@ -46,26 +45,25 @@ and children semantics. It's also the only way to create native elements.
 ```clojure
 
 ;;; Create DOM react elements
-(require '[crinkle.component :as c] ;; element and component ctors
-         '[crinkle.dom :as d])      ;; dom element ctors
-         
-(c/RE :div) ;; div with no props or elements
-(c/RE "div" nil) ;; same. String or Keyword is fine (no runtime difference).
+(require '[crinkle.component :as c :refer [RE CE]]) ;; element and component ctors
+
+(RE :div) ;; div with no props or elements
+(RE "div" nil) ;; same. String or Keyword is fine (no runtime difference).
 
 ;; Like post-React.DOM react, you can use any dom element name you want
-(c/RE :my-custom-element nil)
+(RE :my-custom-element nil)
 
 ;; props can be map literals (no runtime cost), but one level deep only!
-(c/RE :div {:className "my-class" :style #js{:width "100%"} :key "mykey"}
+(RE :div {:className "my-class" :style #js{:width "100%"} :key "mykey"}
   ;; :key and :ref are special, like in React
   ;; Second argument is always props (use nil to omit props)
   ;; Third and follow arguments are assigned to :children property of props.
-  (c/RE :span {:key "line1"} "Some text here"))
-(c/RE :div #js{:className "my-class"}) ;; or js-object literals
+  (RE :span {:key "line1"} "Some text here"))
+(RE :div #js{:className "my-class"}) ;; or js-object literals
 
 ;; Props argument can be something that evaluates at runtime to nil, map,
 ;; or js-object (This does map to js-object conversion at runtime shallowly.)
-(c/RE :div (#(do {:className "my-class" :style #js{:width "100%"}})))
+(RE :div (#(do {:className "my-class" :style #js{:width "100%"}})))
  
 ;; The crinkle.dom namespace provides convenince macros to be a little shorter.
 ;; Only the old React.DOM elements are supported.
@@ -73,11 +71,32 @@ and children semantics. It's also the only way to create native elements.
 (d/div {:className "my-class"})
 
 ;; You can also use a string for a dom element
-(c/RE "div")
+(RE "div")
 ;; Or provide a React class or render function
 ;; (Props and children are turned to js-objects)
-(c/RE my-react-class-or-function {:custom-prop "abc"})
+(RE my-react-class-or-function {:custom-prop "abc"})
+```
 
+### React DOM constructors
+
+The `crinkle.dom` namespace contains convenience macros (not functions!) for
+creating React DOM elements. It is very light sugar over using the
+`crinkle.component/RE` macro directly. Examples:
+
+```clojure
+(require '[crinkle.dom :as d])
+;; Each group expands to the same JS code
+(RE "div")
+(d/div)
+
+
+(RE "div" {:style #js{:color "red"}})
+(RE "div" #js{:style #js{:color "red"}})
+(d/div {:style #js{:color "red"}})
+(d/div #js{:style #js{:color "red"}})
+
+(RE "div" {:className "box"} (RE "a" {:href ""} "Link Text"))
+(d/div {:className "box"} (d/a {:href ""} "Link Text"))
 ```
 
 ### Crinkle Elements
@@ -88,12 +107,11 @@ Use the `crinkle.component/CE` macro to create React Elements with Crinkle's
 raw-props semantics. (CE = Crinkle Element)
 
 ```clojure
-(c/CE my-react-class-or-function ; required
+(CE my-react-class-or-function ; required
   opaque-props ; required
   ;; optional keyword arguments
   :key "optional-react-key"
   :ref optional-ref)
-
 ```
 
 Props will not be interpreted: the component or render function should accept
@@ -110,7 +128,7 @@ Additional utilities:
   a first argument.
 * `crinkle.component/memo` is React.Memo, except the default comparison function
   is `cljs.core/=`
-* `crinke.component/crinkle-factory` creates a crikle element factory with
+* `crinke.component/crinkle-factory` creates a crinkle element factory with
   `crinkle.component/memo`-ized props.
 
 ```clojure
