@@ -10,8 +10,8 @@ Crinkle is a CLJS wrapper for modern (v16+) React. Its goals:
   property access on its props arguments or wrapping in a function or
   React.Component).
 * Keep key and ref separate (instead of mixed with props).
-* Provide a Hooks-like interface that compares changes by CLJS `=` (instead of
-  React's `Object.equal()`). (EXPERIMENTAL)
+* Provide react hooks to compare changes by CLJS `=` (or a custom comparator)
+  instead of React's `Object.is()`.
 * Provide some macros for easier construction of class-based Components
   (instead of using `React.createClass()`). (TODO; this might be better as a
   separate project providing macro sugar to JS `class` syntax.)
@@ -43,7 +43,6 @@ Usage
 and children semantics. It's also the only way to create native elements.
 
 ```clojure
-
 ;;; Create DOM react elements
 (require '[crinkle.component :as c :refer [RE CE]]) ;; element and component ctors
 
@@ -148,11 +147,66 @@ components.
 
 ### React Hooks
 
-React hooks are great, but using them efficiently requires given them an array
-of objects to monitor for changes. Unfortunately, the comparator for the
-elements in this array is not customizeable like `React.memo()` so there is no
-way to benefit from using CLJS immutable data structures. Working around this
-problem is a TODO, and may be impossible without patching react.
+React hooks are great, but using them efficiently requires an array
+of objects to ensure the hook's function (effect, memoized value constructor,
+callback constructor, etc) is not rerun every render. Unfortunately, the
+comparator for the objects in this array is not customizeable like
+`React.memo()` so there is no way to benefit from using CLJS immutable data
+structures.
+
+Crinkle has hooks to help mitigate this problem: `crinkle.component/useEquiv`,
+`crinkle.component/useEquivDeps`, `crinkle.component/use=` and
+`crinkle.component/use=deps`. These hooks each take an object or objects and
+compare them against the value encountered on the previous committed render,
+and return the previous value if they are equal. In other words, these hooks
+"upgrade" value-equality to identity-equality for the sake of React dep
+checking.
+
+```clojure
+;; Without use=, a new callback function would be created on every render
+(defn my-render [{:keys [foo]}]
+  (let [em  (react/useContext MyEventManager)
+        bar (assoc foo :b 2)
+        cb  (react/useCallback
+              (fn [_e] (send! em bar))
+              ;; bar is never identical to bar from previous render,
+              ;; even though it may be equal
+              #js[em bar])]
+    ;; Therefore this component will *always* rerender
+    (CE memoized-renderer {:callback cb})))
+
+;; With use=, a new callback function will only be created when bar is not
+;; `cljs.core/=` to the bar in the previous committed render
+(defn my-efficient-render [{:keys [foo]}]
+  (let [em (react/useContext MyEventManager)
+        bar (c/use= (assoc foo :b 2))
+        cb (react/useCallback
+             (fn [_e] (send! em bar))
+             ;; If foo hasn't changed, this bar *will* be identical to the bar
+             ;; from the previous committed render; meaning react will give you
+             ;; the same identical callback function from that render also!
+             #js[em bar])]
+    ;; Therefore this component will not necessarily rerender
+    (CE memoized-renderer {:callback cb})))
+
+;; You can also memoize an entire deps array at once
+(defn my-efficient-render2 [{:keys [foo bar baz]}]
+  (let [cb (react/useCallback
+             (fn [_e] (do-thing! foo bar baz))
+             ;; Surround the usual js array with c/use=deps
+             (c/use=deps #js[foo bar baz]))]
+    (CE memoized-renderer {:callback cb})))
+
+
+;; Or you can use a custom comparator
+(defn my-efficient-render3 [{:keys [foo bar baz]}]
+  (let [foo+ (c/useEquiv (next-foo foo) my-custom-equiv-fn)
+        cb   (react/useCallback
+               (fn [_e] (do-thing! foo bar baz))
+               (c/useEquivDeps #js[foo bar baz] my-custom-equiv-fn))]
+    (CE memoized-renderer {:callback cb :foo-plus foo+})))
+```
+
 
 Development
 -----------
