@@ -89,21 +89,6 @@
                  (js-props-rm obj))
     :else obj))
 
-(defn assemble-breeze-quiescent-props
-  "INTERNAL USE ONLY! Assemble props in the breeze-quiescent style."
-  [value & [fsa & rsa :as static-args]]
-  (let [props #js{:value value :statics static-args}
-        k     (get fsa :react/key)
-        r     (get fsa :react/ref)]
-    (when (some? k)
-      (gobj/set props "key" k))
-    (when (some? r)
-      (gobj/set props "ref" r))
-    (when (or (some? k) (some? r))
-      (gobj/set props "statics"
-        (conj rsa (dissoc fsa :react/key :react/ref))))
-    props))
-
 (defn memo
   "Memoizes a component function; like React.memo, except the default comparison
   function is clojure's ="

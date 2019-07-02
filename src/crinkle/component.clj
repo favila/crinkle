@@ -1,6 +1,5 @@
 (ns crinkle.component
   (:require [cljs.tagged-literals]
-            [cljs.analyzer]
             [cljs.core])
   (:import (cljs.tagged_literals JSValue)))
 
@@ -39,41 +38,6 @@
              :else component)
          p (js-props* props)]
      (with-meta `(~'js/crinkle.component.react-createElement* ~c ~p ~@children) (meta &form)))))
-
-(defmacro QE
-  "Return a react component using breeze-quiescent style props.
-
-  The first prop argument is assigned to the \"value\" prop.
-  The optional remaining props are assigned to the \"statics\" prop.
-
-  To set key or ref, assoc :react/key or :react/ref to the second props arg."
-  ([component]
-   (with-meta
-     (list 'js/crinkle.component.react-createElement* component
-       (JSValue. {"value" nil "statics" nil}))
-     (meta &form)))
-  ([component dynamic-props]
-   (with-meta `(QE ~component ~dynamic-props nil) (meta &form)))
-  ([component dynamic-props & [fsa & rsa :as static-props]]
-   (if (map? fsa)
-     (let [k     (get fsa :react/key)
-           r     (get fsa :react/ref)
-           props (cond-> {"value"   dynamic-props
-                          "statics" static-props}
-                   k (assoc "key" k)
-                   r (assoc "ref" r)
-                   (or k r) (assoc "statics"
-                                   (conj rsa (dissoc fsa :react/key :react/ref))))]
-       (with-meta
-         (list 'js/crinkle.component.react-createElement*
-           component (JSValue. (update props "statics" vec)))
-         (meta &form)))
-
-     (with-meta
-       (list 'js/crinkle.component.react-createElement* component
-         `(crinkle.component/assemble-breeze-quiescent-props
-            ~dynamic-props ~@static-props))
-       (meta &form)))))
 
 (defmacro keyed-fragment
   "Return a keyed React.Fragment"

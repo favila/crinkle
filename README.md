@@ -192,11 +192,6 @@ Additional utilities:
 (make-foo {:foo-prop "bar"} {:key "optional-key" :ref myref})
 ```
 
-### Breeze-Quiescent Elements
-
-`crinkle.component/QE` is a compatibility macro for Breeze-flavored Quiescent
-components.
-
 ### React Hooks
 
 React hooks are great, but using them efficiently requires an array
