@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Crinkle</name>
   <description>Crinkle is a ReactJS v16.8+ wrapper for ClojureScript</description>
   <url>https://github.com/favila/crinkle</url>
+  <inceptionYear>2018</inceptionYear>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -29,4 +32,6 @@
     <system>GitHub</system>
     <url>https://github.com/favila/crinkle/issues</url>
   </issueManagement>
+  <dependencies></dependencies>
+  <repositories></repositories>
 </project>
