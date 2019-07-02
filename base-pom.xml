@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Crinkle</name>
+  <description>Crinkle is a ReactJS v16.8+ wrapper for ClojureScript</description>
+  <url>https://github.com/favila/crinkle</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+  <groupId>crinkle</groupId>
+  <artifactId>crinkle</artifactId>
+  <version></version>
+  <scm>
+    <connection>scm:git:git://github.com/favila/crinkle.git</connection>
+    <developerConnection>scm:git:ssh://github.com:favila/crinkle.git</developerConnection>
+    <url>http://github.com/favila/crinkle</url>
+  </scm>
+  <developers>
+    <developer>
+      <name>Francis Avila</name>
+      <email>francisga@gmail.com</email>
+      <timezone>America/Chicago</timezone>
+    </developer>
+  </developers>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/favila/crinkle/issues</url>
+  </issueManagement>
+</project>

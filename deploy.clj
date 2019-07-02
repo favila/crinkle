@@ -20,6 +20,7 @@
 (require
   '[clojure.string :as str]
   '[clojure.java.shell :as sh]
+  '[clojure.java.io :as io]
   '[badigeon.clean :as clean]
   '[badigeon.jar :as jar]
   '[badigeon.install :as install]
@@ -59,13 +60,16 @@
 (defn mvn-version [{:keys [major minor revision]}]
   (str major \. minor \. revision))
 
-(defn do-deploy []
-  (let [ver         (parsed-version (git-describe))
+(defn do-deploy [ops]
+  (let [ops         (set ops)
+        ver         (parsed-version (git-describe))
         mver        (mvn-version ver)
         jarbasename (str (name GROUP+ARTIFACT) \- mver ".jar")
         jarfile     (str "target/" jarbasename)]
 
     (clean/clean "target")
+
+    (io/copy (io/file "base-pom.xml") (io/file "pom.xml"))
 
     (jar/jar GROUP+ARTIFACT {:mvn/version mver}
       {;; The jar file produced.
@@ -73,18 +77,19 @@
        :mvn/repos {"clojars" {:name "Clojars Repository"
                               :url  "https://clojars.org/repo"}}})
 
-    #_
-    (install/install GROUP+ARTIFACT {:mvn/version mver}
-      ;; The jar file to be installed
-      jarfile
-      ;; The pom.xml file to be installed. This file is generated when creating the jar with the badigeon.jar/jar function.
-      "pom.xml"
-      {;; The local repository where the jar should be installed.
-       :local-repo (str (System/getProperty "user.home") "/.m2/repository")})
+    (when (contains? ops "install")
+      (install/install GROUP+ARTIFACT {:mvn/version mver}
+        ;; The jar file to be installed
+        jarfile
+        ;; The pom.xml file to be installed. This file is generated when creating the jar with the badigeon.jar/jar function.
+        "pom.xml"
+        {;; The local repository where the jar should be installed.
+         :local-repo (str (System/getProperty "user.home") "/.m2/repository")}))
 
 
     ;; Deploy the previously created jar file to a remote repository.
-    (let [;; Artifacts are maps with a required :file-path key and an optional :extension key
+    (when (contains? ops "deploy")
+      (let [;; Artifacts are maps with a required :file-path key and an optional :extension key
             artifacts [{:file-path jarfile :extension "jar"}
                        {:file-path "pom.xml" :extension "pom"}]
             ;; Artifacts must be signed when deploying non-snapshot versions of artifacts.
@@ -95,8 +100,10 @@
           {;; :id is used to match the repository in the ~/.m2/settings.xml for credentials when no credentials are explicitly provided.
            :id  "clojars"
            ;; The URL of the repository to deploy to.
-           :url "https://clojars.org/repo"}))
+           :url "https://clojars.org/repo"})))
     ))
 
-(do-deploy)
-(shutdown-agents)
+(try
+  (do-deploy *command-line-args*)
+  (finally
+    (shutdown-agents)))
