@@ -28,7 +28,7 @@ function:
 (defn my-function-component [{:keys [foo-text] :as props}]
   ;; Return React Elements using any library (or not) you want.
   ;; Here's one way using Crinkle:
-  (RE :p foo-text))
+  (RE :p {} foo-text))
   
 ;; Note: no wrappers or component factories! 
 (react/render
@@ -43,7 +43,7 @@ or component factories.
 ;; Class components are fine too
 (def MyClassComponent
   (create-react-class/createReactClass
-     #js{:render (fn [{:keys foo-text}] (RE :p foo-text))}))
+     #js{:render (fn [{:keys foo-text}] (RE :p {} foo-text))}))
 
 (react/render
   (CE MyClassComponent {:foo-text "Hello World!"})
