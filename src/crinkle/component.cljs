@@ -29,7 +29,7 @@
   base-e)
 
 (def ^{:arglists '([base-e props])
-       :jsdoc ["@param {*} base-e" "@param {*} props" "@return {*}"]}
+       :jsdoc ["@param {*} base_e" "@param {*} props" "@return {*}"]}
   create-element-raw-props*
   (if ^boolean (.isFrozen js/Object (react/createElement "span"))
     create-element-raw-props*-dev
