@@ -1,7 +1,8 @@
 (ns crinkle.component
   (:require-macros crinkle.component)
   (:require [react :as react]
-            [goog.object :as gobj]))
+            [goog.object :as gobj]
+            [goog.functions :as gfns]))
 
 ;; INTERNAL USE ONLY! These are aliases for macroexpansion to target
 ;; If crinkle.component macros expanded to react/createElement directly, then
@@ -141,7 +142,7 @@
     (if ^boolean (equal? value oldv)
       ;; unsure if better to have an always-setting fn and include value in the
       ;; deps; or to do this.
-      (do (react/useEffect goog/nullFunction) oldv)
+      (do (react/useEffect gfns/UNDEFINED) oldv)
       (do (react/useEffect #(do (set! (.-current vref) value)
                                 (crinkle.component/js-undefined)))
           value))))
@@ -151,7 +152,7 @@
   [value]
   (let [vref (react/useRef value)]
     (if (= value (.-current vref))
-      (do (react/useEffect goog/nullFunction) (.-current vref))
+      (do (react/useEffect gfns/UNDEFINED) (.-current vref))
       (do (react/useEffect #(do (set! (.-current vref) value)
                                 (crinkle.component/js-undefined)))
           value))))
